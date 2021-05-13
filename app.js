@@ -13,13 +13,13 @@ app.get('/', (req, res) => {
 });
 
 // This will emit the event to all connected sockets
-io.emit('chat message', { msg: "A user has connected", name: "Admin" })
+io.emit('chat message', { msg: "A user has connected :", name:"" })
 
 
 io.on('connection', (socket) => {
     const _id = socket.id
 
-    io.emit('chat message', { msg: "A user has connected", name: "Admin" })
+    io.emit('chat message', { msg: "A user has connected :", name:""})
     console.log('a user connected');
     
 
@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
 
     
     socket.on('disconnect', () => {
-        io.emit('chat message', {msg: `${connectionList[_id]} has disconnected`, name: "Admin"});
+        io.emit('chat message', {msg: `${connectionList[_id]} has disconnected :`, name: "Admin"});
         delete connectionList[_id]
         
         io.emit('connected', connectionList)
