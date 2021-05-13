@@ -62,13 +62,77 @@
 </head>
 
 <body>
+    <ul id="online"></ul>
     <ul id="messages"></ul>
+    <span id="typing"></span>
     <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+        <input id="nickname" value="" />
+        <input id="input" placeholder="Choose nickname to continue"
+            disabled /><button>Send</button>
     </form>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
+
         var socket = io();
+
+        var messages    = document.getElementById('messages');
+
+        // Nick and Msg features
+        var form        = document.getElementById('form');
+        var input       = document.getElementById('input');
+        
+        // Homework Features
+        var nickname    = document.getElementById('nickname')
+        var online      = document.getElementById('online')
+        var searchTimeout
+
+
+        // Waits for nickname form to be filled up
+        nickname.addEventListener('keydown', function (e) {
+            if (searchTimeout != undefined) { clearTimeout(searchTimeout) }
+
+            searchTimeout = setTimeout(function () {
+                socket.emit('connected', nickname.value)
+                nickname.disabled = true
+                input.disabled = false
+            }, 1000);
+        })
+
+
+        // Creates each msg to be linked to a nickname
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', { msg: input.value, name: nickname.value });
+
+                var item = document.createElement('li');
+                item.textContent = nickname.value + ": " + input.value;
+                messages.appendChild(item);
+
+                // resets  mesg value to nothing
+                input.value = '';
+            }
+        });
+
+        socket.on('connected', function (connected) {
+            online.innerHTML = ''
+            for (const [key, value] of Object.entries(connected)) {
+                var item = document.createElement('li');
+                item.textContent = value
+
+                online.appendChild(item)
+            }
+        })
+
+
+        socket.on('chat message', function (data) {
+            if (data.name != nickname.value) {
+                var item = document.createElement('li');
+                item.textContent = data.name + ": " + data.msg;
+                messages.appendChild(item);
+            }
+        });
     </script>
 </body>
 
